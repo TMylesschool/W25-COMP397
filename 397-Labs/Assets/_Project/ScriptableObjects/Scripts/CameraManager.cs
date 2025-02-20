@@ -10,7 +10,6 @@ namespace Platformer397
 
         private void Awake() 
         {
-            
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
             if (player != null) {return;}

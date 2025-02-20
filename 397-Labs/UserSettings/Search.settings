@@ -71,6 +71,8 @@ providers = {
 objectSelectors = {
 }
 recentSearches = [
+	""
+	"h: t=MeshFilter vertices>=1024"
 ]
 searchItemFavorites = [
 ]
