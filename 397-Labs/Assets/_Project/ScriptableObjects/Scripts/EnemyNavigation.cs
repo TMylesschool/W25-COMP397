@@ -13,6 +13,10 @@ namespace Platformer397
         [SerializeField] private float distanceThreshold = 1.0f;
         private int index = 0;
         private Vector3 destination;
+        //Enemy sensing stats
+        [SerializeField] private LayerMask mask; //The layer that correspond to player
+        [SerializeField] private int viewDistance = 10;
+        [SerializeField] private EnemyStates state = EnemyStates.Patrolling;
         private void Awake()
         {
             agent = GetComponent<NavMeshAgent>();
@@ -34,11 +38,41 @@ namespace Platformer397
 
         private void Update()
         {
-            if (Vector3.Distance(destination, transform.position) < distanceThreshold)
+            switch(state)
             {
-                index = (index + 1) % waypoints.Count;
-                destination = waypoints[index].position;
-                agent.destination = destination;
+                case EnemyStates.Patrolling:
+                    if (Vector3.Distance(destination, transform.position) < distanceThreshold)
+                    {
+                        index = (index + 1) % waypoints.Count;
+                        destination = waypoints[index].position;
+                    }
+                    break;
+                case EnemyStates.Chasing:
+                    //starts chasing the player while visable
+                    destination = player.gameObject.transform.position;
+                    break;
+                default:
+                    Debug.LogError("state not configured", this);
+                    break;
+            }
+            agent.destination = destination;
+        }
+
+        private void FixedUpdate()
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, viewDistance, mask))
+            {
+                if (hit.transform.gameObject.CompareTag("Player"))
+                {
+                    state = EnemyStates.Chasing;
+                }
+                Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.green);
+            }
+            else
+            {
+                state = EnemyStates.Patrolling;
+                Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * viewDistance, Color.yellow);
             }
         }
 
